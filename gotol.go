@@ -6,17 +6,23 @@ import (
 	"flag"
 	"encoding/xml"
 	"strings"
+	"strconv"
 )
 
 var inputFile = flag.String("infile", "xml/tol.xml", "Input file path")
 
 type(
 	Node struct {
-		Id          string
-		Name        string
-		Parent      *Node
-		OtherName   string
-		Description string
+		Id                           int
+		Name, OtherName, Description string
+		Parent                       *Node
+	}
+	MNode struct {
+		Id          int `bson:"_id,omitempty" json:"_id"`
+		Parent      int `bson:"parent,omitempty" json:"parent"`
+		Name        string `bson:"name" json:"name"`
+		OtherName   string `bson:"othername" json:"othername"`
+		Description string `bson:"description" json:"description"`
 	}
 /*	XMLID struct {
 		ID string `xml:"ID,attr"`
@@ -34,6 +40,10 @@ type(
 func main() {
 	flag.Parse()
 
+	dbcl := new(Mongo)
+	dbcl.Init()
+	defer dbcl.Sess.Close()
+
 	xmlFile, err := os.Open(*inputFile)
 	if err != nil {
 		log.Println("Error opening file:", err)
@@ -43,8 +53,7 @@ func main() {
 
 	decoder := xml.NewDecoder(xmlFile)
 	var inEl, ct, pt string
-	var node Node
-	var pnode Node
+	var node, pnode Node
 	Loop:
 	for {
 		t, _ := decoder.Token()
@@ -62,17 +71,18 @@ func main() {
 					pnode = node
 				}
 				ID := se.Attr[1]
-				id := ID.Value
-				node = Node{Id:id, Name:"", Parent: &pnode, OtherName:"" , Description:""}
+				id, err := strconv.Atoi(ID.Value)
+				var _ = err
+				node = Node{Id:id, Name:"", Parent: &pnode, OtherName:"", Description:""}
 
 			} else if inEl == "NODES" {
-				log.Println("NODES sava:",node)
-				//ds.save(&node);
+				log.Println("NODES savae:",node)
+				dbcl.Save(&node);
 			}
 
 		case xml.CharData:
 			chd := strings.TrimSpace(string(se.Copy()))
-			if(chd == "") {
+			if (chd == "") {
 				continue Loop
 			}
 			if ct == "NAME" && pt == "NODE" {
@@ -80,24 +90,21 @@ func main() {
 			}else if ct == "DESCRIPTION" {
 				node.Description = chd
 			}else if ct == "NAME" && pt == "OTHERNAME" {
-				if node.OtherName !="" {
-					node.OtherName +=  ", "+ chd
-				}else{
+				if node.OtherName != "" {
+					node.OtherName += ", " + chd
+				}else {
 					node.OtherName += chd
 				}
 			}
 		case xml.EndElement:
 			inEl = se.Name.Local
 			if inEl == "NODE" {
-				log.Println("NODE save:",node)
-				//ds.save(&node);
+				log.Println("NODE save:", node)
+				dbcl.Save(&node);
 			}
 			if inEl == "NODES" {
 				pnode = *pnode.Parent
-			}else if inEl == "NODE" {
 			}
-
-		default:
 		}
 	}
 
