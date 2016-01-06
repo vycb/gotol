@@ -6,20 +6,47 @@ import (
 	"log"
 )
 
-const INSERT_COUNT uint = 1000
-const MaxOutstanding uint = 1
-
-var sem = make(chan uint, MaxOutstanding)
-
-type(
-	Mongo struct {
-		Db    *mgo.Database
-		Sess  *mgo.Session
-		Tol   *mgo.Collection
-		Bulk  *mgo.Bulk
-		Ct    uint
-	}
+const (
+	INSERT_COUNT uint = 1000
+//MaxOutstanding uint = 1
 )
+
+//var sem = make(chan uint, MaxOutstanding)
+
+type Mongo struct {
+	Db   *mgo.Database
+	Sess *mgo.Session
+	Tol  *mgo.Collection
+	Bulk *mgo.Bulk
+	Ct   uint
+}
+
+func (m *Mongo) Init() {
+
+	sess, err := mgo.Dial("mongodb://vycb:123@ds029541.mongolab.com:29541/blog")
+	if err != nil {
+		panic(err)
+	}
+
+	m.Sess = sess
+
+	m.Sess.SetMode(mgo.Monotonic, true)
+
+	m.Db = m.Sess.DB("blog")
+	m.Tol = m.Db.C("tol")
+
+	index := mgo.Index{
+		Key:        []string{"name", "parent"},
+		Background: true,
+		Sparse:     true,
+	}
+
+	err = m.Tol.EnsureIndex(index)
+	if err != nil {
+		panic(err)
+	}
+	//m.Nodes = []*Node
+}
 
 func (m *Mongo) CtNext() {
 	m.Ct++
@@ -37,25 +64,9 @@ func (n *Node)ToMNode() *MNode {
 	return &MNode{Id:n.Id, Name:n.Name, Parent:n.Parent.Id, OtherName:n.OtherName, Description:n.Description}
 }
 
-func (m *Mongo) Init() {
-
-	sess, err := mgo.Dial("mongodb://vycb:123@ds029541.mongolab.com:29541/blog")
-	if err != nil {
-		panic(err)
-	}
-
-	m.Sess = sess
-
-	m.Sess.SetMode(mgo.Monotonic, true)
-
-	m.Db = m.Sess.DB("blog")
-	m.Tol = m.Db.C("tol")
-	m.Bulk = m.Tol.Bulk()
-	//m.Nodes = []*Node
-}
-
 func (m *Mongo) NewBulk() {
 	m.Bulk = m.Tol.Bulk()
+	m.Bulk.Unordered()
 }
 
 func (m *Mongo  ) Save(node *Node) {
@@ -66,16 +77,16 @@ func (m *Mongo  ) Save(node *Node) {
 	m.CtNext()
 
 	if m.GetCt() >= INSERT_COUNT {
-		sem <- 1
-		go func() {
-			r, err := m.Bulk.Run()
-			if err != nil {
-				log.Println(err, r)
-			}
-			m.SetCt()
-			m.NewBulk()
-			<-sem
-		}()
+		//sem <- 1
+		//go func() {
+		_, err := m.Bulk.Run()
+		if err != nil {
+			log.Println("Bulk.Run:", err)
+		}
+		m.NewBulk()
+		m.SetCt()
+		//<-sem
+		//}()
 	}
 
 }
