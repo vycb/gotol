@@ -30,20 +30,20 @@ func mr() {
 
 	fsearch = strconv.Itoa(result[0].Id)
 	fwhat = "id"
-	query()
+	querymongo()
 
 	for _, n := range result {
 		log.Println(n.Id, n.Value.Count)
 	}
 }
 
-func query() {
+func querymongo() {
 	mc := new(Mongo)
 	mc.Init()
 	defer mc.Sess.Close()
 
 	var (
-		nodes []MNode
+		nodes []DNode
 		fq bson.M
 		ires int
 		e error

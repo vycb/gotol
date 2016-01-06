@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"encoding/xml"
 	"strings"
 	"strconv"
@@ -14,7 +14,7 @@ type(
 		Name, OtherName, Description string
 		Parent                       *Node
 	}
-	MNode struct {
+	DNode struct {
 		Id          int `bson:"_id,omitempty" json:"_id"`
 		Parent      int `bson:"parent,omitempty" json:"parent"`
 		Name        string `bson:"name" json:"name"`
@@ -23,23 +23,32 @@ type(
 	}
 )
 
+func (n *Node)ToDNode() *DNode {
+	return &DNode{Id:n.Id, Name:n.Name, Parent: n.Parent.Id, OtherName:n.OtherName, Description:n.Description}
+}
 func parse() {
-	mc := new(Mongo)
-	mc.Init()
-	defer mc.Sess.Close()
-	mc.NewBulk()
+	var dc Db
 
+	if fdbcl == "mongo" {
+		dc = &Mongo{}
+	}else{
+		dc = &Cassandra{}
+	}
+	dc.Init()
+	dc.NewBatch()
+	defer dc.SessionClose()
 
 	xmlFile, err := os.Open(fimport)
 	if err != nil {
-		log.Println("Error opening file:", err)
+		fmt.Println("Error opening file:", err)
 		return
 	}
 	defer xmlFile.Close()
 
 	decoder := xml.NewDecoder(xmlFile)
 	var inEl, ct, pt string
-	var node, pnode Node
+	var node *Node
+	pnode := new(Node)
 	Loop:
 	for {
 		t, _ := decoder.Token()
@@ -57,13 +66,14 @@ func parse() {
 					pnode = node
 				}
 				ID := se.Attr[1]
-				id, err := strconv.Atoi(ID.Value)
-				var _ = err
-				node = Node{Id:id, Name:"", Parent: &pnode, OtherName:"", Description:""}
+				id, _ := strconv.Atoi(ID.Value)
+
+				node = &Node{Id:id, Name:"", Parent: pnode, OtherName:"", Description:""}
 
 			} else if inEl == "NODES" {
-				log.Println("NODES savae:", node)
-				mc.Save(&node);
+
+				fmt.Println(node.Id, node.Name, node.Parent.Id, node.OtherName, node.Description)
+				dc.Save(node);
 			}
 
 		case xml.CharData:
@@ -85,11 +95,12 @@ func parse() {
 		case xml.EndElement:
 			inEl = se.Name.Local
 			if inEl == "NODE" {
-				log.Println("NODE save:", node)
-				mc.Save(&node);
+
+				fmt.Println(node.Id, node.Name, node.Parent.Id, node.OtherName, node.Description)
+				dc.Save(node);
 			}
 			if inEl == "NODES" {
-				pnode = *pnode.Parent
+				pnode = pnode.Parent
 			}
 		}
 	}

@@ -10,13 +10,32 @@ func main() {
 	switch fmod {
 	default:
 	case "query":
+
 		switch fwhat {
+		case "toroot":
+			toroot()
+
 		case "mr":
-			mr()
+
+			switch fdbcl {
+			default:
+			case "mongo":
+				mr()
+			case "cassandra":
+				querycassandra()
+			}
+
 		case "name":
-		default:
-			query()
+
+			switch fdbcl {
+			default:
+			case "mongo":
+				querymongo()
+			case "cassandra":
+				querycassandra()
+			}
 		}
+
 	case "import":
 		parse()
 	}
@@ -24,12 +43,13 @@ func main() {
 }
 
 var (
-fmod, fwhat, fsearch, fimport string
+	fmod, fdbcl, fwhat, fsearch, fimport string
 )
 
 func init() {
 	flag.StringVar(&fimport, "f", "xml/tol.xml", "Input file path")
 	flag.StringVar(&fmod, "m", "query", "exe mode import Db/query Db")
-	flag.StringVar(&fwhat, "w", "mr", "what is function to perform query")
-	flag.StringVar(&fsearch, "s", "Homopterus", "word to search Db")
+	flag.StringVar(&fdbcl, "dc", "cassandra", "Db Client type")
+	flag.StringVar(&fwhat, "w", "toroot", "what is a function to query")
+	flag.StringVar(&fsearch, "s", "Eudorylas", "word to search Db")
 }

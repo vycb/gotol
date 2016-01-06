@@ -6,11 +6,6 @@ import (
 	"log"
 )
 
-const (
-	INSERT_COUNT uint = 1000
-//MaxOutstanding uint = 1
-)
-
 //var sem = make(chan uint, MaxOutstanding)
 
 type Mongo struct {
@@ -18,11 +13,11 @@ type Mongo struct {
 	Sess *mgo.Session
 	Tol  *mgo.Collection
 	Bulk *mgo.Bulk
-	Ct   uint
+	Ct   *Counter
 }
 
 func (m *Mongo) Init() {
-
+	m.Ct = &Counter{}
 	sess, err := mgo.Dial("mongodb://vycb:123@ds029541.mongolab.com:29541/blog")
 	if err != nil {
 		panic(err)
@@ -48,43 +43,31 @@ func (m *Mongo) Init() {
 	//m.Nodes = []*Node
 }
 
-func (m *Mongo) CtNext() {
-	m.Ct++
+func (m *Mongo)SessionClose() {
+	defer m.Sess.Close()
 }
 
-func (m *Mongo) GetCt() uint {
-	return m.Ct
-}
-
-func (m *Mongo) SetCt() {
-	m.Ct = 0
-}
-
-func (n *Node)ToMNode() *MNode {
-	return &MNode{Id:n.Id, Name:n.Name, Parent:n.Parent.Id, OtherName:n.OtherName, Description:n.Description}
-}
-
-func (m *Mongo) NewBulk() {
+func (m *Mongo) NewBatch() {
 	m.Bulk = m.Tol.Bulk()
 	m.Bulk.Unordered()
 }
 
-func (m *Mongo  ) Save(node *Node) {
+func (m *Mongo  ) Save(n *Node) {
 
-	mn := node.ToMNode()
+	dn := n.ToDNode()
 
-	m.Bulk.Insert(&mn)
-	m.CtNext()
+	m.Bulk.Insert(&dn)
+	m.Ct.CtNext()
 
-	if m.GetCt() >= INSERT_COUNT {
+	if m.Ct.GetCt() >= INSERT_COUNT {
 		//sem <- 1
 		//go func() {
 		_, err := m.Bulk.Run()
 		if err != nil {
 			log.Println("Bulk.Run:", err)
 		}
-		m.NewBulk()
-		m.SetCt()
+		m.NewBatch()
+		m.Ct.SetCt()
 		//<-sem
 		//}()
 	}
