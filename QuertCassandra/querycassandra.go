@@ -1,8 +1,7 @@
-package main
+package QueryCassandra
 
 import (
 	"strings"
-	//"strconv"
 	"fmt"
 	"github.com/gocql/gocql"
 )
@@ -20,7 +19,7 @@ func count(p *int) int {
 	return cnt
 }
 
-func querycassandra() {
+func Query(fsearch *string) {
 	dc := &Cassandra{}
 	dc.Init()
 	defer dc.SessionClose()
@@ -40,7 +39,7 @@ func querycassandra() {
 	var id, parent, ct int
 	var name, othername, description string
 	for iter.Scan(&id, &name, &parent, &othername, &description) {
-		if strings.Contains(strings.ToLower(name), strings.ToLower(fsearch)) {
+		if strings.Contains(strings.ToLower(name), strings.ToLower(*fsearch)) {
 			ct = count(&id)
 
 			fmt.Println(id, name, parent, othername, description, "c:", ct)
@@ -53,7 +52,7 @@ func querycassandra() {
 	}
 }
 
-func toroot() {
+func Toroot(fsearch *string) {
 	dc := &Cassandra{}
 	dc.Init()
 	defer dc.SessionClose()

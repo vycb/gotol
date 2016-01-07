@@ -1,17 +1,16 @@
-package main
+package DbClient
 
-const (
-	INSERT_COUNT uint = 1000
-	CINSERT_COUNT uint = 600
-//MaxOutstanding uint = 1
+import (
+	"github.com/vycb/gotol/Parser"
 )
 
 type (
+
 	Db interface {
 		Init()
 		NewBatch()
 		SessionClose()
-		Save(n *Node)
+		Save(n *Parser.Node)
 	}
 
 	Counter struct {
