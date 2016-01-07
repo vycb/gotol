@@ -14,7 +14,6 @@ import (
 )
 
 func main() {
-	flag.Parse()
 
 	switch fmod {
 	default:
@@ -46,15 +45,15 @@ func main() {
 		}
 
 	case "import":
-		Parse(&fimport, &fdbcl)
+		Parse()
 	}
 
 }
 
-func Parse(fimport *string, fdbcl *string) {
+func Parse() {
 	var dc DbClient.Db
 
-	if *fdbcl == "mongo" {
+	if fdbcl == "mongo" {
 		dc = &QueryMongo.Mongo{}
 	}else{
 		dc = &QueryCassandra.Cassandra{}
@@ -63,7 +62,7 @@ func Parse(fimport *string, fdbcl *string) {
 	dc.NewBatch()
 	defer dc.SessionClose()
 
-	xmlFile, err := os.Open(*fimport)
+	xmlFile, err := os.Open(fimport)
 	if err != nil {
 		fmt.Println("Error opening file:", err)
 		return
@@ -133,13 +132,14 @@ func Parse(fimport *string, fdbcl *string) {
 
 
 var (
-	fmod, fdbcl, fwhat, fsearch, fimport string
+fmod, fdbcl, fwhat, fsearch, fimport string
 )
 
 func init() {
 	flag.StringVar(&fimport, "f", "xml/tol.xml", "Input file path")
 	flag.StringVar(&fmod, "m", "query", "exe mode import Db/query Db")
 	flag.StringVar(&fdbcl, "dc", "cassandra", "Db Client type")
-	flag.StringVar(&fwhat, "w", "toroot", "what is a function to query")
-	flag.StringVar(&fsearch, "s", "Eudorylas", "word to search Db")
+	flag.StringVar(&fwhat, "w", "name", "what is a function to query")
+	flag.StringVar(&fsearch, "s", "bacter", "word to search Db")
+	flag.Parse()
 }
