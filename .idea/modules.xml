@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/QueryPq/QueryPq.iml" filepath="$PROJECT_DIR$/QueryPq/QueryPq.iml" />
       <module fileurl="file://$PROJECT_DIR$/gotol.iml" filepath="$PROJECT_DIR$/gotol.iml" />
     </modules>
   </component>

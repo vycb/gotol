@@ -5,19 +5,22 @@ import (
 	"github.com/vycb/gotol/DbClient"
 	"gopkg.in/mgo.v2"
 	"log"
+	"golang.org/x/tools/container/intsets"
 )
-const INSERT_COUNT uint = 1000
+const INSERT_COUNT uint = 100
 
 type Mongo struct {
 	Db   *mgo.Database
 	Sess *mgo.Session
 	Tol  *mgo.Collection
 	Bulk *mgo.Bulk
-	Ct   *DbClient.Counter
+	ct   DbClient.Counter
+	idsSet intsets.Sparse
 }
 
 func (m *Mongo) Init() {
-	m.Ct = &DbClient.Counter{}
+	m.ct = 0
+
 	sess, err := mgo.Dial("mongodb://vycb:123@ds029541.mongolab.com:29541/blog")
 	if err != nil {
 		panic(err)
@@ -40,7 +43,6 @@ func (m *Mongo) Init() {
 	if err != nil {
 		panic(err)
 	}
-	//m.Nodes = []*Node
 }
 
 func (m *Mongo)SessionClose() {
@@ -56,20 +58,21 @@ func (m *Mongo  ) Save(n *Parser.Node) {
 
 	dn := n.ToDNode()
 
-	m.Bulk.Insert(&dn)
-	m.Ct.CtNext()
+	if m.idsSet.Has(dn.Id) {
+		return
+	}
+	m.idsSet.Insert(dn.Id)
 
-	if m.Ct.GetCt() >= INSERT_COUNT {
-		//sem <- 1
-		//go func() {
+	m.Bulk.Insert(&dn)
+	m.ct.CtNext()
+
+	if m.ct.GetCt() >= INSERT_COUNT {
 		_, err := m.Bulk.Run()
 		if err != nil {
 			log.Println("Bulk.Run:", err)
 		}
 		m.NewBatch()
-		m.Ct.SetCt()
-		//<-sem
-		//}()
+		m.ct.SetCt()
 	}
 
 }

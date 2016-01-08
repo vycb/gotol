@@ -11,6 +11,7 @@ import (
 	"strings"
 	"strconv"
 	"os"
+	"github.com/vycb/gotol/QueryPq"
 )
 
 func main() {
@@ -21,16 +22,16 @@ func main() {
 
 		switch fwhat {
 		case "toroot":
-			QueryCassandra.Toroot(&fsearch)
+			QueryCassandra.Toroot(fsearch)
 
 		case "mr":
 
 			switch fdbcl {
 			default:
 			case "mongo":
-				QueryMongo.MapReduce(&fsearch, &fwhat)
+				//QueryMongo.MapReduce(fsearch, fwhat)
 			case "cassandra":
-				QueryCassandra.Query(&fsearch)
+				QueryCassandra.Query(fsearch)
 			}
 
 		case "name":
@@ -38,9 +39,9 @@ func main() {
 			switch fdbcl {
 			default:
 			case "mongo":
-				QueryMongo.Query(&fsearch, &fwhat)
+				QueryMongo.Query(fsearch, fwhat)
 			case "cassandra":
-				QueryCassandra.Query(&fsearch)
+				QueryCassandra.Query(fsearch)
 			}
 		}
 
@@ -53,10 +54,13 @@ func main() {
 func Parse() {
 	var dc DbClient.Db
 
-	if fdbcl == "mongo" {
+	switch fdbcl {
+	case "mongo":
 		dc = &QueryMongo.Mongo{}
-	}else{
+	case "cassandra":
 		dc = &QueryCassandra.Cassandra{}
+	default:
+		dc = &QueryPq.Pq{}
 	}
 	dc.Init()
 	dc.NewBatch()
@@ -136,10 +140,10 @@ fmod, fdbcl, fwhat, fsearch, fimport string
 )
 
 func init() {
+	flag.StringVar(&fsearch, "s", "pestis", "word to search Db")
+	flag.StringVar(&fwhat, "w", "name", "mr/name: what is a function to query")
+	flag.StringVar(&fdbcl, "dc", "mongo", "pg/mongo/cassandra: Db Client type")
+	flag.StringVar(&fmod, "m", "query", "query/import: exe mode import Db/query Db")
 	flag.StringVar(&fimport, "f", "xml/tol.xml", "Input file path")
-	flag.StringVar(&fmod, "m", "query", "exe mode import Db/query Db")
-	flag.StringVar(&fdbcl, "dc", "cassandra", "Db Client type")
-	flag.StringVar(&fwhat, "w", "name", "what is a function to query")
-	flag.StringVar(&fsearch, "s", "bacter", "word to search Db")
 	flag.Parse()
 }

@@ -11,12 +11,12 @@ const INSERTST string = `INSERT INTO tol (id, name, parent, othername, descripti
 
 type Cassandra struct {
 	Session *gocql.Session
-	Ct      *DbClient.Counter
+	ct      DbClient.Counter
 	batch   *gocql.Batch
 }
 
 func (c *Cassandra)Init() {
-	c.Ct = &DbClient.Counter{}
+	c.ct = 0
 	cluster := gocql.NewCluster("localhost")
 	cluster.Keyspace = "tol_keyspace"
 	cluster.Consistency = gocql.Quorum
@@ -37,9 +37,9 @@ func (c *Cassandra) Save(n *Parser.Node) {
 		var _ = d.Name
 	}
 	c.batch.Query(INSERTST, d.Id, d.Name, d.Parent, d.OtherName, d.Description)
-	c.Ct.CtNext()
+	c.ct.CtNext()
 
-	if c.Ct.GetCt() >= CINSERT_COUNT {
+	if c.ct.GetCt() >= CINSERT_COUNT {
 		err := c.Session.ExecuteBatch(c.batch)
 		if err != nil {
 			log.Panic(err)

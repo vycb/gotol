@@ -13,19 +13,17 @@ type (
 		Save(n *Parser.Node)
 	}
 
-	Counter struct {
-		Ct uint
-	}
+	Counter uint
 )
 
 func (dc *Counter) CtNext() {
-	dc.Ct++
+	*dc++
 }
 
 func (dc *Counter) GetCt() uint {
-	return dc.Ct
+	return uint(*dc)
 }
 
 func (dc *Counter) SetCt() {
-	dc.Ct = 0
+	*dc = 0
 }
