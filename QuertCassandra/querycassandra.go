@@ -44,9 +44,9 @@ func Query(fsearch string) {
 		if strings.Contains(strings.ToLower(name), strings.ToLower(fsearch)) {
 			ct = count(id)
 
-			if ct > 0 {
+			fmt.Println(id, name, parent, othername, description, "c:", ct)
 
-				fmt.Println(id, name, parent, othername, description, "c:", ct)
+			if ct > 0 {
 
 				fmt.Println(">")
 

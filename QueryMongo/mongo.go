@@ -19,7 +19,6 @@ type Mongo struct {
 }
 
 func (m *Mongo) Init() {
-	m.ct = 0
 
 	sess, err := mgo.Dial("mongodb://vycb:123@ds029541.mongolab.com:29541/blog")
 	if err != nil {

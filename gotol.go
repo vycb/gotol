@@ -5,6 +5,7 @@ import (
 	"github.com/vycb/gotol/DbClient"
 	"github.com/vycb/gotol/QuertCassandra"
 	"github.com/vycb/gotol/QueryMongo"
+	"github.com/vycb/gotol/QueryRedis"
 	"flag"
 	"fmt"
 	"encoding/xml"
@@ -42,6 +43,9 @@ func main() {
 				QueryMongo.Query(fsearch, fwhat)
 			case "cassandra":
 				QueryCassandra.Query(fsearch)
+			case "redis":
+				qc := &QueryRedis.QueryClient{}
+				qc.Query(fsearch)
 			}
 		}
 
@@ -59,8 +63,10 @@ func Parse() {
 		dc = &QueryMongo.Mongo{}
 	case "cassandra":
 		dc = &QueryCassandra.Cassandra{}
-	default:
+	case "pq":
 		dc = &QueryPq.Pq{}
+	case "redis":
+		dc = &QueryRedis.Redis{}
 	}
 	dc.Init()
 	dc.NewBatch()
@@ -140,9 +146,9 @@ fmod, fdbcl, fwhat, fsearch, fimport string
 )
 
 func init() {
-	flag.StringVar(&fsearch, "s", "pestis", "word to search Db")
+	flag.StringVar(&fsearch, "s", "*bacter*", "word to search Db")
 	flag.StringVar(&fwhat, "w", "name", "mr/name: what is a function to query")
-	flag.StringVar(&fdbcl, "dc", "mongo", "pg/mongo/cassandra: Db Client type")
+	flag.StringVar(&fdbcl, "dc", "redis", "redis/pq/mongo/cassandra: Db Client type")
 	flag.StringVar(&fmod, "m", "query", "query/import: exe mode import Db/query Db")
 	flag.StringVar(&fimport, "f", "xml/tol.xml", "Input file path")
 	flag.Parse()

@@ -6,7 +6,8 @@ import (
 	"github.com/jackc/pgx"
 	"github.com/vycb/gotol/Parser"
 	"github.com/vycb/gotol/DbClient"
-	"strconv"
+	//"strconv"
+	"golang.org/x/tools/container/intsets"
 )
 
 const INSERT_COUNT uint = 1
@@ -15,6 +16,7 @@ type Pq struct {
 	Conn  *pgx.ConnPool
 	ct    DbClient.Counter
 	query string
+	idsSet intsets.Sparse
 }
 
 func extractConfig() pgx.ConnConfig {
@@ -46,7 +48,6 @@ func afterConnect(conn *pgx.Conn) (err error) {
 }
 
 func (p *Pq) Init() {
-	p.ct = 0
 	conn, err := pgx.NewConnPool(pgx.ConnPoolConfig{
 		ConnConfig:  extractConfig(),
 		AfterConnect: afterConnect,
@@ -70,13 +71,16 @@ func (p *Pq) NewBatch() {
 
 func (p *Pq) Save(n *Parser.Node) {
 	d := n.ToDNode()
-	if d.Id == 4 {
-		var _ = d.Name
-	}
-	i := strconv.Itoa(d.Id)
-	a := strconv.Itoa(d.Parent)
 
-	p.query += "("+ i +",'"+ d.Name+"', "+ a +", '"+d.OtherName+"', '"+d.Description+"'+)"
+	if p.idsSet.Has(d.Id) {
+		return
+	}
+	p.idsSet.Insert(d.Id)
+
+	//i := strconv.Itoa(d.Id)
+	//a := strconv.Itoa(d.Parent)
+	//
+	//p.query += "("+ i +",'"+ d.Name+"', "+ a +", '"+d.OtherName+"', '"+d.Description+"'+)"
 
 	p.ct.CtNext()
 

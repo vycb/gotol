@@ -5,18 +5,19 @@ import(
 	"github.com/vycb/gotol/Parser"
 	"log"
 	"github.com/gocql/gocql"
+	"golang.org/x/tools/container/intsets"
 )
-const CINSERT_COUNT uint = 600
+const INSERT_COUNT uint = 600
 const INSERTST string = `INSERT INTO tol (id, name, parent, othername, description) VALUES(?, ?, ?, ?, ?)`
 
 type Cassandra struct {
 	Session *gocql.Session
 	ct      DbClient.Counter
 	batch   *gocql.Batch
+	idsSet  intsets.Sparse
 }
 
 func (c *Cassandra)Init() {
-	c.ct = 0
 	cluster := gocql.NewCluster("localhost")
 	cluster.Keyspace = "tol_keyspace"
 	cluster.Consistency = gocql.Quorum
@@ -33,13 +34,16 @@ func (c *Cassandra) NewBatch() {
 
 func (c *Cassandra) Save(n *Parser.Node) {
 	d := n.ToDNode()
-	if d.Id == 4 {
-		var _ = d.Name
+
+	if c.idsSet.Has(d.Id) {
+		return
 	}
+	c.idsSet.Insert(d.Id)
+
 	c.batch.Query(INSERTST, d.Id, d.Name, d.Parent, d.OtherName, d.Description)
 	c.ct.CtNext()
 
-	if c.ct.GetCt() >= CINSERT_COUNT {
+	if c.ct.GetCt() >= INSERT_COUNT {
 		err := c.Session.ExecuteBatch(c.batch)
 		if err != nil {
 			log.Panic(err)

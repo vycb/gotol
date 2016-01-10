@@ -1,12 +1,12 @@
 package Parser
 
-
 type(
 	Node struct {
 		Id                           int
 		Name, OtherName, Description string
 		Parent                       *Node
 	}
+
 	DNode struct {
 		Id          int `bson:"_id,omitempty" json:"_id"`
 		Parent      int `bson:"parent,omitempty" json:"parent"`
@@ -15,6 +15,20 @@ type(
 		Description string `bson:"description" json:"description"`
 	}
 
+	TNode struct {
+		Id          string `json:"id"`
+		Name        string `json:"name"`
+		Parent      string `json:"parent"`
+		Othername   string `json:"othername"`
+		Description string `json:"description"`
+		Count       int `json:"count"`
+	}
+
+	AData struct {
+		Key     TNode `json:"key"`
+		Childes []TNode `json:"childes"`
+		Parents []TNode `json:"parents"`
+	}
 )
 
 func (n *Node)ToDNode() *DNode {
