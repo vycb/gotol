@@ -70,7 +70,7 @@ func (q *QueryClient)Query(fsearch string) {
 				fmt.Println(c.Id, c.Name, c.Parent, c.Othername, c.Description, c.Count)
 			}
 
-			if cnt > 0 {
+			if cnt > 0 && len(adata.Parents) >0 {
 				fmt.Println("->")
 
 				for _, c := range adata.Parents {

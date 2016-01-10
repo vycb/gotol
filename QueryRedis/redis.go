@@ -45,12 +45,29 @@ local function findHash(find, prop)
 	return ''
 end
 
-local function getParent(hash, pid)
+local function countItems(find, prop)
+	count = 0
+	for x = 1, #res, 1 do
 
+		local hash = redis.call('HGETALL', res[x])
+		local item = getProp(hash, prop)
+
+		if item == find then
+			count = count +1
+		end
+	end
+	return count
+end
+
+local function getParent(hash, pid)
 	local p = findHash(pid, 'id')
 
 	if isset(p) then
-		table.insert(hash, hashToNode(p))
+		local ip = getProp(p, 'id')
+		local count = countItems(ip,'parent')
+		local node = hashToNode(p)
+		node['count'] = count
+		table.insert(hash, node)
 	end
 
 	local pi = getProp(p, 'parent')
@@ -102,7 +119,7 @@ for j,v in ipairs(hashd) do
 end
 
 cjson.encode_sparse_array(true)
-return cjson.encode({['key'] = hashToNode(key), ['childes'] = childes, ['parents'] = toroot})
+return cjson.encode({key = hashToNode(key), childes = childes, parents = toroot})
 `;
 type Redis struct {
 	client   *redis.Client

@@ -146,7 +146,7 @@ fmod, fdbcl, fwhat, fsearch, fimport string
 )
 
 func init() {
-	flag.StringVar(&fsearch, "s", "*bacter*", "word to search Db")
+	flag.StringVar(&fsearch, "s", "21829:single-stranded dna viruses*", "word to search Db")
 	flag.StringVar(&fwhat, "w", "name", "mr/name: what is a function to query")
 	flag.StringVar(&fdbcl, "dc", "redis", "redis/pq/mongo/cassandra: Db Client type")
 	flag.StringVar(&fmod, "m", "query", "query/import: exe mode import Db/query Db")
