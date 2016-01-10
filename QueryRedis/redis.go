@@ -13,7 +13,7 @@ import (
 const INSERT_COUNT uint = 1000
 const ANALISE_SCRIPT string =`
 local res,keyp,keyid,count
-local hashd,toroot,childes,key = {},{},{},{}
+local toroot,childes,key = {},{},{}
 
 local function isset(val)
 	return  val ~= nil and val ~= ''
@@ -89,33 +89,16 @@ for idx = 1, #res, 1 do
 	local parent = getProp(hash, 'parent')
 
 	if parent == keyid then
-		table.insert(hashd, {i = getProp(hash, 'id'), n = getProp(hash,'name'), p = parent, o = getProp(hash, 'othername'), d = getProp(hash, 'description') })
+		local hi getProp(hash, 'id')
+		local count = countItems(hi,'parent')
+		table.insert(childes, {id = hi, name = getProp(hash,'name'), parent = parent, othername = getProp(hash, 'othername'), description = getProp(hash, 'description'), count = count })
 	end
 end
-
 
 keyp = getProp(key, 'parent')
-
-if isset(keyp) and tonumber(keyp) > 0 and table.getn(hashd) > 0 then
+if isset(keyp) and tonumber(keyp) > 0 and table.getn(childes) > 0 then
 
 	getParent(toroot, keyp)
-end
-
-
-for j,v in ipairs(hashd) do
-	count = 0
-
-	for x = 1, #res, 1 do
-
-		local hash = redis.call('HGETALL', res[x])
-		local parent = getProp(hash, 'parent')
-
-		if parent == v['i'] then
-			count = count +1
-		end
-	end
-
-	table.insert(childes, {id = v['i'], name = v['n'], parent = v['p'], othername = v['o'], description = v['d'], count = count} )
 end
 
 cjson.encode_sparse_array(true)
