@@ -36,10 +36,11 @@ func (q *QueryClient)Query(fsearch string) {
 	q.rc = new(Redis)
 	q.rc.Init()
 	q.rc.initScript()
-
 	defer q.rc.client.Close()
-	//size := rc.client.DbSize()
-	//fmt.Println(size)
+
+	size := q.rc.client.DbSize()
+	fmt.Println(size)
+
 	var cursor int64
 
 	for {

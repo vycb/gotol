@@ -1,18 +1,19 @@
 package main
 
 import (
-	"github.com/vycb/gotol/Parser"
-	"github.com/vycb/gotol/DbClient"
-	"github.com/vycb/gotol/QuertCassandra"
-	"github.com/vycb/gotol/QueryMongo"
-	"github.com/vycb/gotol/QueryRedis"
+	"encoding/xml"
 	"flag"
 	"fmt"
-	"encoding/xml"
-	"strings"
-	"strconv"
 	"os"
+	"strconv"
+	"strings"
+
+	"github.com/vycb/gotol/DbClient"
+	"github.com/vycb/gotol/Parser"
+	"github.com/vycb/gotol/QuertCassandra"
+	"github.com/vycb/gotol/QueryMongo"
 	"github.com/vycb/gotol/QueryPq"
+	"github.com/vycb/gotol/QueryRedis"
 )
 
 func main() {
@@ -83,7 +84,7 @@ func Parse() {
 	var inEl, ct, pt string
 	var node *Parser.Node
 	pnode := new(Parser.Node)
-	Loop:
+Loop:
 	for {
 		t, _ := decoder.Token()
 		if t == nil {
@@ -102,27 +103,27 @@ func Parse() {
 				ID := se.Attr[1]
 				id, _ := strconv.Atoi(ID.Value)
 
-				node = &Parser.Node{Id:id, Name:"", Parent: pnode, OtherName:"", Description:""}
+				node = &Parser.Node{Id: id, Name: "", Parent: pnode, OtherName: "", Description: ""}
 
 			} else if inEl == "NODES" {
 
 				fmt.Println(node.Id, node.Name, node.Parent.Id, node.OtherName, node.Description)
-				dc.Save(node);
+				dc.Save(node)
 			}
 
 		case xml.CharData:
 			chd := strings.TrimSpace(string(se.Copy()))
-			if (chd == "") {
+			if chd == "" {
 				continue Loop
 			}
 			if ct == "NAME" && pt == "NODE" {
 				node.Name = chd
-			}else if ct == "DESCRIPTION" {
+			} else if ct == "DESCRIPTION" {
 				node.Description = chd
-			}else if ct == "NAME" && pt == "OTHERNAME" {
+			} else if ct == "NAME" && pt == "OTHERNAME" {
 				if node.OtherName != "" {
 					node.OtherName += ", " + chd
-				}else {
+				} else {
 					node.OtherName += chd
 				}
 			}
@@ -131,7 +132,7 @@ func Parse() {
 			if inEl == "NODE" {
 
 				fmt.Println(node.Id, node.Name, node.Parent.Id, node.OtherName, node.Description)
-				dc.Save(node);
+				dc.Save(node)
 			}
 			if inEl == "NODES" {
 				pnode = pnode.Parent
@@ -140,13 +141,12 @@ func Parse() {
 	}
 }
 
-
 var (
-fmod, fdbcl, fwhat, fsearch, fimport string
+	fmod, fdbcl, fwhat, fsearch, fimport string
 )
 
 func init() {
-	flag.StringVar(&fsearch, "s", "21829:single-stranded dna viruses*", "word to search Db")
+	flag.StringVar(&fsearch, "s", "*virus*", "word to search Db")
 	flag.StringVar(&fwhat, "w", "name", "mr/name: what is a function to query")
 	flag.StringVar(&fdbcl, "dc", "redis", "redis/pq/mongo/cassandra: Db Client type")
 	flag.StringVar(&fmod, "m", "query", "query/import: exe mode import Db/query Db")
