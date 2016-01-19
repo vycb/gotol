@@ -1,7 +1,7 @@
 package QueryMongo
 
 import (
-	"github.com/vycb/gotol/Parser"
+	."github.com/vycb/gotol/Node"
 	"github.com/vycb/gotol/DbClient"
 	"gopkg.in/mgo.v2"
 	"log"
@@ -53,7 +53,7 @@ func (m *Mongo) NewBatch() {
 	m.Bulk.Unordered()
 }
 
-func (m *Mongo  ) Save(n *Parser.Node) {
+func (m *Mongo  ) Save(n *Node) {
 
 	dn := n.ToDNode()
 

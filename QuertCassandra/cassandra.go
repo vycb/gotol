@@ -2,7 +2,7 @@ package QueryCassandra
 
 import(
 	"github.com/vycb/gotol/DbClient"
-	"github.com/vycb/gotol/Parser"
+	."github.com/vycb/gotol/Node"
 	"log"
 	"github.com/gocql/gocql"
 	"golang.org/x/tools/container/intsets"
@@ -32,7 +32,7 @@ func (c *Cassandra) NewBatch() {
 	c.batch = gocql.NewBatch(gocql.LoggedBatch)
 }
 
-func (c *Cassandra) Save(n *Parser.Node) {
+func (c *Cassandra) Save(n *Node) {
 	d := n.ToDNode()
 
 	if c.idsSet.Has(d.Id) {

@@ -4,7 +4,7 @@ import (
 	"gopkg.in/redis.v3"
 	"github.com/vycb/gotol/DbClient"
 	"golang.org/x/tools/container/intsets"
-	"github.com/vycb/gotol/Parser"
+	."github.com/vycb/gotol/Node"
 	"strconv"
 	"strings"
 	"log"
@@ -155,7 +155,7 @@ func (r *Redis) Crp() int{
 //	return len(r.pipeline) -1
 //}
 
-func (r *Redis  ) Save(n *Parser.Node) {
+func (r *Redis  ) Save(n *Node) {
 
 	dn := n.ToDNode()
 

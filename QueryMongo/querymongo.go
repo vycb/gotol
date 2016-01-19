@@ -1,7 +1,7 @@
 package QueryMongo
 
 import (
-	"github.com/vycb/gotol/Parser"
+	."github.com/vycb/gotol/Node"
 	"fmt"
 //"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -17,7 +17,7 @@ func parent(id int) int {
 	mc.Init()
 	defer mc.Sess.Close()
 
-	var node Parser.DNode
+	var node DNode
 	err := mc.Tol.Find(bson.M{"_id": id}).One(&node)
 
 	if err != nil {
@@ -29,7 +29,7 @@ func parent(id int) int {
 	return node.Parent
 }
 
-func childes(id int) (count int, nodes []Parser.DNode) {
+func childes(id int) (count int, nodes []DNode) {
 	mc := new(Mongo)
 	mc.Init()
 	defer mc.Sess.Close()
@@ -56,7 +56,7 @@ func childes(id int) (count int, nodes []Parser.DNode) {
 	return len(nodes), nodes
 }
 
-var nodes []Parser.DNode
+var nodes []DNode
 
 func Query(fsearch string, fwhat string) {
 	mc := new(Mongo)

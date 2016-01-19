@@ -2,6 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/DbClient/DbClient.iml" filepath="$PROJECT_DIR$/DbClient/DbClient.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Node/Node.iml" filepath="$PROJECT_DIR$/Node/Node.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Parser/Parser.iml" filepath="$PROJECT_DIR$/Parser/Parser.iml" />
+      <module fileurl="file://$PROJECT_DIR$/QuertCassandra/QuertCassandra.iml" filepath="$PROJECT_DIR$/QuertCassandra/QuertCassandra.iml" />
+      <module fileurl="file://$PROJECT_DIR$/QueryMongo/QueryMongo.iml" filepath="$PROJECT_DIR$/QueryMongo/QueryMongo.iml" />
       <module fileurl="file://$PROJECT_DIR$/QueryPq/QueryPq.iml" filepath="$PROJECT_DIR$/QueryPq/QueryPq.iml" />
       <module fileurl="file://$PROJECT_DIR$/QueryRedis/QueryRedis.iml" filepath="$PROJECT_DIR$/QueryRedis/QueryRedis.iml" />
       <module fileurl="file://$PROJECT_DIR$/gotol.iml" filepath="$PROJECT_DIR$/gotol.iml" />

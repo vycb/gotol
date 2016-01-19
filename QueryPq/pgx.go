@@ -4,7 +4,7 @@ package QueryPq
 import (
 	"log"
 	"github.com/jackc/pgx"
-	"github.com/vycb/gotol/Parser"
+	."github.com/vycb/gotol/Node"
 	"github.com/vycb/gotol/DbClient"
 	//"strconv"
 	"golang.org/x/tools/container/intsets"
@@ -69,7 +69,7 @@ func (p *Pq) NewBatch() {
 	p.query = "insert into tol(id, name, parent, othername, description) values"
 }
 
-func (p *Pq) Save(n *Parser.Node) {
+func (p *Pq) Save(n *Node) {
 	d := n.ToDNode()
 
 	if p.idsSet.Has(d.Id) {

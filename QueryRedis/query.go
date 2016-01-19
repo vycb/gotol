@@ -1,7 +1,7 @@
 package QueryRedis
 
 import (
-	"github.com/vycb/gotol/Parser"
+	."github.com/vycb/gotol/Node"
 	"fmt"
 	"log"
 	"encoding/json"
@@ -11,7 +11,7 @@ type QueryClient struct {
 	rc *Redis
 }
 
-func (q *QueryClient)analise(key string) (int, *Parser.AData) {
+func (q *QueryClient)analise(key string) (int, *AData) {
 
 	dat, err := q.rc.analiseScript.Run(q.rc.client, []string{"0"}, []string{key}).Result()
 	if err != nil {
@@ -20,7 +20,7 @@ func (q *QueryClient)analise(key string) (int, *Parser.AData) {
 	js := dat.(string)
 	//fmt.Println(js)
 
-	var adata Parser.AData
+	var adata AData
 	if len(js) > 2 {
 
 		err = json.Unmarshal([]byte(js), &adata)
@@ -81,6 +81,36 @@ func (q *QueryClient)Query(fsearch string) {
 			}
 
 			fmt.Println("----------------------\n")
+		}
+	}
+}
+
+func (q *QueryClient)Scan(fsearch string) {
+	q.rc = new(Redis)
+	q.rc.Init()
+	q.rc.initScript()
+	defer q.rc.client.Close()
+
+	size := q.rc.client.DbSize()
+	fmt.Println(size)
+
+	var cursor int64
+
+	for {
+		var keys []string
+		var err error
+		cursor, keys, err = q.rc.client.Scan(cursor, fsearch, 2000).Result()
+		if err != nil {
+			log.Println(err)
+		}
+		if cursor == 0 {
+			break
+		}
+
+		for _, k := range keys {
+
+			fmt.Println(k)
+
 		}
 	}
 }

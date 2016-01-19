@@ -1,7 +1,7 @@
 package DbClient
 
 import (
-	"github.com/vycb/gotol/Parser"
+	."github.com/vycb/gotol/Node"
 )
 
 type (
@@ -10,7 +10,7 @@ type (
 		Init()
 		NewBatch()
 		SessionClose()
-		Save(n *Parser.Node)
+		Save(n *Node)
 	}
 
 	Counter uint
